@@ -12,10 +12,7 @@ export const handler = define.handlers({
     const options = form.get("options");
 
     if (!(file instanceof File)) {
-      return new Response(
-        JSON.stringify({ error: "file is required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
+      return errorResponse("file is required", 400);
     }
 
     const { publicUrl, passPhrase } = ctx.state.server_app_public_url

@@ -57,7 +57,7 @@ export default define.page(function App({ Component }) {
         </header>
         <Component />
         <footer class="footer footer-center p-4 bg-base-200 text-base-content border-t border-base-300 fixed inset-x-0 bottom-0 shadow-sm">
-          <p>© 2025 Deno Sandbox ImageConvert by Imagemagick by Octo8080X.</p>
+          <p>© 2025-2026 Deno Sandbox ImageConvert by ImageMagick by Octo8080X.</p>
         </footer>
       </body>
     </html>

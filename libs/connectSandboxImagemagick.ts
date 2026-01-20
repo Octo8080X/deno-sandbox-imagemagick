@@ -18,7 +18,7 @@ export type SandboxRequestState = {
 
 async function refreshSandbox(): Promise<SandboxConnectInfo> {
   const passPhrase = crypto.randomUUID();
-  await setCache("server_app_path_phrase", passPhrase, 600_000);
+  await setCache("server_app_pass_phrase", passPhrase, 600_000);
 
   const { publicUrl, sandboxId } = await startServerAppSandbox(
     SERVER_APP_ENTRYPOINT,
@@ -34,7 +34,7 @@ async function refreshSandbox(): Promise<SandboxConnectInfo> {
 export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
   const cachedUrl = await getCache<string>("server_app_public_url");
   const cachedId = await getCache<string>("server_app_sandbox_id");
-  const cachedPass = await getCache<string>("server_app_path_phrase");
+  const cachedPass = await getCache<string>("server_app_pass_phrase");
 
   if (cachedUrl && cachedId && cachedPass && await isRunningSandbox(cachedId)) {
     return { publicUrl: cachedUrl, passPhrase: cachedPass };
@@ -50,7 +50,10 @@ export async function fetchSandboxApi(
 ): Promise<Response> {
   const headers = new Headers(init.headers);
   headers.set("X-App-Header", state.server_app_pass_phrase);
-  headers.set("accept", "application/json");
+  // Only set accept header if not already provided and no body (non-binary request)
+  if (!headers.has("accept") && init.json !== undefined) {
+    headers.set("accept", "application/json");
+  }
 
   let body: BodyInit | undefined = init.body ?? undefined;
 

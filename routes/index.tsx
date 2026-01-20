@@ -11,7 +11,7 @@ export default define.page(async function Home() {
     const sandboxId = await getCache<string>("server_app_sandbox_id");
     if(sandboxId == null || !await isRunningSandbox(sandboxId)){
       const pathPhrase = crypto.randomUUID();
-      await setCache("server_app_path_phrase", pathPhrase, 600);
+      await setCache("server_app_path_phrase", pathPhrase, 600000);
 
       console.log("Starting server app sandbox...");
       const {publicUrl, sandboxId} =  await startServerAppSandbox(
@@ -19,8 +19,8 @@ export default define.page(async function Home() {
         {...SERVER_APP_SANDBOX_OPTIONS, env: { CALLER_PASSPHRASE: pathPhrase } }
       )
       console.log("serverAppPublicUrl:", publicUrl);
-      await setCache("server_app_public_url", publicUrl, 600);
-      await setCache("server_app_sandbox_id", sandboxId, 600);
+      await setCache("server_app_public_url", publicUrl, 600000);
+      await setCache("server_app_sandbox_id", sandboxId, 600000);
     }
   }
 

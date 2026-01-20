@@ -19,11 +19,12 @@ export const handler = define.handlers({
 
     // 変換先サーバーのURLをKVから取得
     let target = await getCache<string>("server_app_public_url");
+    console.log("Current target from cache:", target);
     if(target == null) {
       const sandboxId = await getCache<string>("server_app_sandbox_id");
       if(sandboxId == null || !await isRunningSandbox(sandboxId)){
         const pathPhrase = crypto.randomUUID();
-        await setCache("server_app_path_phrase", pathPhrase, 600);
+        await setCache("server_app_path_phrase", pathPhrase, 600000);
   
         console.log("Starting server app sandbox...");
         const {publicUrl, sandboxId} =  await startServerAppSandbox(
@@ -32,8 +33,8 @@ export const handler = define.handlers({
         )
         console.log("serverAppPublicUrl:", publicUrl);
         target = publicUrl;
-        await setCache("server_app_public_url", publicUrl, 600);
-        await setCache("server_app_sandbox_id", sandboxId, 600);
+        await setCache("server_app_public_url", publicUrl, 600000);
+        await setCache("server_app_sandbox_id", sandboxId, 600000);
       }
     }
     

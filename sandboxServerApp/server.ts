@@ -1,4 +1,4 @@
-import { Hono } from "@hono/hono";
+import { Context, Hono } from "jsr:@hono/hono";
 
 const HEADER_KEY = "X-App-Header";
 const PASSPHRASE_ENV = "CALLER_PASSPHRASE"; // 呼び出し元パスフレーズを格納
@@ -19,14 +19,14 @@ function validateCaller(c: any) {
   return null;
 }
 
-app.get("/", (c) => {
+app.get("/", (c: Context) => {
   const res = validateCaller(c);
   if (res) return res;
 
   return c.text("Hello, Hono! from Deno Sandbox");
 });
 
-app.post("/convert", async (c) => {
+app.post("/convert", async (c: Context) => {
   const res = validateCaller(c);
   if (res) return res;
 

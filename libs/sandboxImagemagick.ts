@@ -53,15 +53,14 @@ export const SERVER_APP_SANDBOX_OPTIONS: SandboxOptions = {
 export async function isRunningSandbox(sandboxId: string): Promise<boolean> {
   const client = new Client();
 
-  const sandboxes = await client.sandboxes.list()
-  console.log(sandboxes);
+  const sandboxes = await client.sandboxes.list();
   for (const sandbox of sandboxes) {
     if (sandbox.id === sandboxId && sandbox.status === "running") {
-      console.log(`Sandbox ${sandboxId} is found in the list.`);
+      console.info(`Sandbox ${sandboxId} is running.`);
       return true;
     }
   }
-  console.log(`Sandbox ${sandboxId} is not found in the list.`);
+  console.info(`Sandbox ${sandboxId} is not running.`);
   return false;
   
 }
@@ -70,7 +69,7 @@ export const startServerAppSandbox = async <T>(
   entrypoint: string,
   options?: SandboxOptions,
 ): Promise<{publicUrl: string, sandboxId: string}> => {
-  console.log("startServerAppSandbox options:", options);
+  console.info("Starting server app sandbox...");
   await using sandbox = await createSandbox(options);
   await sandbox.deno.run({ entrypoint });
   const publicUrl = await sandbox.exposeHttp({ port: 3000 });
@@ -91,27 +90,27 @@ export async function initSandBoxStorage() {
 
   // imagemagick 用の volume初期化
   await withSandbox(async (sandbox) => {
-    console.log("apt update");
+    console.info("apt update");
     await sandbox.sh`apt-get update > /dev/null 2>&1`.sudo();
   
-    console.log("install curl + certs + font stack deps");
+    console.info("install curl + certs + font stack deps");
     await sandbox
       .sh`DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates curl fontconfig libfreetype6 libexpat1 libuuid1 libharfbuzz0b libglib2.0-0 libgraphite2-3 libfribidi0 libpcre2-8-0 libx11-6 libxext6 libxrender1 libxcb1 libxcb-render0 libxcb-shm0 libxau6 libxdmcp6`
       .sudo();
   
-    console.log("download standalone magick AppImage");
+    console.info("download standalone magick AppImage");
     await sandbox
       .sh`curl -fsSL -o /tmp/magick.appimage https://download.imagemagick.org/ImageMagick/download/binaries/magick`
       .sudo();
     await sandbox.sh`chmod +x /tmp/magick.appimage`.sudo();
   
-    console.log("extract AppImage payload (no FUSE available)");
+    console.info("extract AppImage payload (no FUSE available)");
     await sandbox.sh`sh -c 'cd /tmp && ./magick.appimage --appimage-extract'`
       .sudo();
     await sandbox.sh`mkdir -p /data/imagemagick`.sudo();
     await sandbox.sh`cp -a /tmp/squashfs-root/. /data/imagemagick/`.sudo();
     await sandbox.sh`mkdir -p /data/imagemagick/lib`.sudo();
-    console.log("copying linked runtime libs into the volume");
+    console.info("copying linked runtime libs into the volume");
     await sandbox.sh`sh -c 'set -e; ldd /data/imagemagick/usr/bin/magick | awk "/=>/ {print $3}" | grep -E "^/" | while read -r path; do echo "lib: $path"; cp -n "$path" /data/imagemagick/lib/; done'`
       .sudo();
     // imagemagick が依存しているフォント関連ライブラリを追加でコピー
@@ -122,7 +121,6 @@ export async function initSandBoxStorage() {
     await sandbox.sh`cp -n /usr/lib/x86_64-linux-gnu/libfribidi.so.0 /data/imagemagick/lib/`.sudo();
     await sandbox.sh`cp -n /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 /data/imagemagick/lib/`.sudo();
     await sandbox.sh`cp -n /usr/lib/x86_64-linux-gnu/libfreetype.so.6 /data/imagemagick/lib/`.sudo();
-    console.log(await sandbox.sh`ls -la /data/imagemagick/lib | head`.text());
 
     // 環境変数を含む情報を追加してmagickラッパースクリプトを作成
     await sandbox.sh`sh -c 'cat <<"EOF" > /data/imagemagick/magick
@@ -134,11 +132,8 @@ EOF'`.sudo();
     await sandbox.sh`chmod +x /data/imagemagick/magick`.sudo();
     await sandbox.sh`sync`.sudo();
   
-    console.log(await sandbox.sh`find /data/imagemagick -maxdepth 2 -type f | head -n 20`.text());
-  
-    console.log("verify ImageMagick");
+    console.info("verify ImageMagick");
     await sandbox.sh`/data/imagemagick/magick -version`.sudo();
-    console.log(await sandbox.sh`ls -la /data/imagemagick`.text());
 
     // sandbox を落とす前にsyncしておかないと反映されないケースがある。
     await sandbox.sh`sync`.sudo();

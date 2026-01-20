@@ -28,7 +28,6 @@ export const handler = define.handlers({
       forwardForm.append("options", options.trim());
     }
 
-    console.log("forward convert request");
     const resp = await fetchSandboxApi(
       {
         server_app_pass_phrase: passPhrase,

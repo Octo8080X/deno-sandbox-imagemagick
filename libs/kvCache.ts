@@ -1,15 +1,20 @@
 /// <reference lib="deno.unstable" />
-const CACHE_KEY = `kvCache` as const;
 
-const store = await Deno.openKv(":memory:");
+const CACHE_KEY = "kvCache" as const;
+
+// Use in-memory KV for dev; persistent KV for prod-like environments.
+const store = Deno.env.get("APP_ENV") === "dev"
+  ? await Deno.openKv(":memory:")
+  : await Deno.openKv();
 
 export function getCacheKey(key: string): string[] {
   return [CACHE_KEY, key];
 }
+
 export async function setCache<T>(
   id: string,
   content: T | string | string[],
-  expireIn: number = 120,
+  expireIn = 120,
 ): Promise<void> {
   const key = getCacheKey(id);
   await store.set(key, content, { expireIn });
@@ -21,14 +26,17 @@ export async function getCache<T>(id: string): Promise<T | null> {
   return (val.value ?? null) as T | null;
 }
 
+export async function deleteCache(id: string): Promise<void> {
+  const key = getCacheKey(id);
+  await store.delete(key);
+}
+
 export async function fetchCache<T>(
   key: string,
-  expireIn: number = 120,
+  expireIn = 120,
   func: () => Promise<T | null>,
-) {
-  console.log("fetchCache key:", key);
+): Promise<T | null> {
   let res = await getCache<T | string[] | string>(key);
-  console.log("fetchCache res:", res);
 
   if (!res) {
     res = await func();
@@ -37,5 +45,5 @@ export async function fetchCache<T>(
     }
     await setCache(key, res, expireIn);
   }
-  return res;
+  return res as T;
 }

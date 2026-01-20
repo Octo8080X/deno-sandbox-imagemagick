@@ -7,7 +7,7 @@ export default define.page(function App({ Component }) {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta property="og:title" content="Deno Sandbox Memo by git" />
+        <meta property="og:title" content="ImageConvert by Imagemagick" />
         <meta
           property="og:description"
           content="imagemagick application using Deno Deploy Sandbox."
@@ -15,11 +15,11 @@ export default define.page(function App({ Component }) {
         <meta name="twitter:card" content="summary_large_image" />
         <meta
           property="og:image"
-          content="https://deno-sandbox-memo.octo8080x.deno.net/ogp.png"
+          content="https://deno-sandbox-imagemagick.octo8080x.deno.net/ogp.png"
         />
         <meta
           property="twitter:image"
-          content="https://deno-sandbox-memo.octo8080x.deno.net/ogp.png"
+          content="https://deno-sandbox-imagemagick.octo8080x.deno.net/ogp.png"
         />
 
         <title>ImageConvert by imagemagick on Deno Sandbox</title>
@@ -34,7 +34,7 @@ export default define.page(function App({ Component }) {
             </div>
             <nav class="flex gap-2">
               <a
-                href="https://github.com/Octo8080X/deno-sandbox-memo"
+                href="https://github.com/Octo8080X/deno-sandbox-imagemagick"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn btn-neutral shadow-lg hover:scale-105 transition-transform"

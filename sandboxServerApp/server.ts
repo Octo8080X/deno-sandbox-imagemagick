@@ -5,6 +5,19 @@ const PASSPHRASE_ENV = "CALLER_PASSPHRASE"; // 呼び出し元パスフレーズ
 
 const app = new Hono();
 
+function shellLikeArgs(input: string): string[] {
+  // Simple shell-words parser: handles quoted segments and escaped quotes.
+  const result: string[] = [];
+  const re = /"([^"\\]*(?:\\.[^"\\]*)*)"|'([^'\\]*(?:\\.[^'\\]*)*)'|(\S+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(input)) !== null) {
+    if (m[1] !== undefined) result.push(m[1].replace(/\\"/g, '"'));
+    else if (m[2] !== undefined) result.push(m[2].replace(/\\'/g, "'"));
+    else if (m[3] !== undefined) result.push(m[3]);
+  }
+  return result;
+}
+
 function validateCaller(c: any) {
   const expected = Deno.env.get(PASSPHRASE_ENV);
   if (!expected) {
@@ -59,24 +72,15 @@ app.post("/convert", async (c: Context) => {
     await Deno.writeFile(inputPath, new Uint8Array(await file.arrayBuffer()));
 
     // ImageMagick convert: user-provided options followed by png output
-    let convertSuccess = true;
-    let convertError = "";
+    const optionArgs = shellLikeArgs(options.trim());
+    const convertArgs = optionArgs.length > 0
+      ? [inputPath, ...optionArgs, outputPath]
+      : [inputPath, outputPath];
 
-    if (options.trim().length == 0) {
-      return c.text(`convert failed: no options`, 500);
-    }
-
-    const optionArgs = options.trim().split(/\s+/);
     const convert = new Deno.Command("/data/imagemagick/magick", {
-      args: [inputPath, ...optionArgs, outputPath],
+      args: convertArgs,
     });
     const { success, stderr } = await convert.output();
-    convertSuccess = success;
-    convertError = new TextDecoder().decode(stderr);
-    
-    if (!convertSuccess) {
-      return c.text(`convert failed: ${convertError}`, 500);
-    }
 
     if (!success) {
       const msg = new TextDecoder().decode(stderr);

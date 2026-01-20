@@ -1,6 +1,6 @@
-# ImageConvert by imagemagick on Deno Sandbox
+# ImageConvert by ImageMagick on Deno Sandbox
 
-A memo application that uses Deno Sandbox to run imagemagick commands securely.
+An image conversion app that runs ImageMagick safely inside Deno Deploy Sandbox.
 
 ## Environment
 
@@ -10,8 +10,8 @@ Create a `.env` at the project root before setup. Minimum required values:
 # dev uses in-memory KV; prod uses persistent KV
 APP_ENV=dev
 
-# optional: path to your repo base (if used by your workflow)
-SANDBOX_GIT_BASE=<absolute path to the working repo dir>
+# required for CORS/CSRF allowlist
+APP_ORIGIN=http://localhost:8000
 ```
 
 ## Setup

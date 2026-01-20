@@ -47,7 +47,7 @@ export const SERVER_APP_SANDBOX_OPTIONS: SandboxOptions = {
   },
   region: "ord",
   memoryMb: 4096,
-  lifetime: "10m",
+  timeout: "10m",
 };
 
 export async function isRunningSandbox(sandboxId: string): Promise<boolean> {
@@ -72,7 +72,7 @@ export const startServerAppSandbox = async <T>(
 ): Promise<{publicUrl: string, sandboxId: string}> => {
   console.log("startServerAppSandbox options:", options);
   await using sandbox = await createSandbox(options);
-  await sandbox.createJsRuntime({ entrypoint });
+  await sandbox.deno.run({ entrypoint });
   const publicUrl = await sandbox.exposeHttp({ port: 3000 });
   return {publicUrl, sandboxId: sandbox.id};
 }
@@ -127,8 +127,8 @@ export async function initSandBoxStorage() {
     // 環境変数を含む情報を追加してmagickラッパースクリプトを作成
     await sandbox.sh`sh -c 'cat <<"EOF" > /data/imagemagick/magick
 #!/bin/sh
-  export LD_LIBRARY_PATH=/data/imagemagick/lib:\${LD_LIBRARY_PATH}
-  export MAGICK_CONFIGURE_PATH=/data/imagemagick/usr/lib/ImageMagick-7.1.2/config-Q16HDRI
+export LD_LIBRARY_PATH=/data/imagemagick/lib:\${LD_LIBRARY_PATH}
+export MAGICK_CONFIGURE_PATH=/data/imagemagick/usr/lib/ImageMagick-7.1.2/config-Q16HDRI
 exec /data/imagemagick/usr/bin/magick "$@"
 EOF'`.sudo();
     await sandbox.sh`chmod +x /data/imagemagick/magick`.sudo();
@@ -154,29 +154,14 @@ EOF'`.sudo();
   };
 
   await withSandbox(async (sandbox) => {
-    await sandbox.writeTextFile("/data/server_app/server.ts", Deno.readTextFileSync("./sandboxServerApp/server.ts"));
-    await sandbox.writeTextFile("/data/server_app/deno.json", Deno.readTextFileSync("./sandboxServerApp/deno.json"));
+    await sandbox.fs.writeTextFile("/data/server_app/server.ts", Deno.readTextFileSync("./sandboxServerApp/server.ts"));
+    await sandbox.fs.writeTextFile("/data/server_app/deno.json", Deno.readTextFileSync("./sandboxServerApp/deno.json"));
     await sandbox.sh`cd /data/server_app && deno install`;
     await sandbox.sh`ls -la /data/server_app`.sudo();
     
     // sandbox を落とす前にsyncしておかないと反映されないケースがある。
     await sandbox.sh`sync`.sudo();
   }, serverAppSandboxOptions);
-
-
-  // 動作確認用 imagemagick sandbox
-  //await withSandbox(async (sandbox) => {
-  //  await sandbox.writeFile("img.png", await Deno.readFile("./img.png"));
-  //
-  //  console.log("convert image (resize + sepia)");
-  //  await sandbox
-  //    .sh`/data/imagemagick/magick img.png -resize 100x100 -sepia-tone 50% converted.png`;
-  //  console.log("read image and write to host");
-  //  await Deno.writeFile(
-  //    "converted.png",
-  //    await sandbox.readFile("converted.png"),
-  //  );
-  //}, imagemagickSandboxOptions);
 }
 
 if (import.meta.main) {

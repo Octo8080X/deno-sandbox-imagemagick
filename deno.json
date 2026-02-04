@@ -24,7 +24,8 @@
   ],
   "imports": {
     "@/": "./",
-    "@deno/sandbox": "jsr:@deno/sandbox@^0.8.0",
+    "@deno/sandbox": "jsr:@deno/sandbox@^0.10.0",
+    "@std/async": "jsr:@std/async@^1.1.1",
     "@types/node": "npm:@types/node@^22",
     "daisyui": "npm:daisyui@^5.5.14",
     "fresh": "jsr:@fresh/core@^2.2.0",

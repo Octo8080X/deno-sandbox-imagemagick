@@ -1,4 +1,5 @@
 import { Client, Sandbox, SandboxOptions, Volume } from "@deno/sandbox";
+import { delay } from "@std/async/delay";
 
 const IMAGEMAGICK_STORAGE_VOLUME_NAME = "imagemagick-storage-volume";
 const SERVER_APP_STORAGE_VOLUME_NAME = "server-app-storage-volume";
@@ -23,8 +24,9 @@ async function getStorageVolume(slug: string) {
 }
 
 const createSandbox = async (options?: SandboxOptions) => {
+  console.info("Creating sandbox...");
   const sandbox = await Sandbox.create({
-    memoryMb: 4096,
+    memory: "1GB",
     region: "ord",
     ...options,
   });
@@ -35,7 +37,9 @@ const withSandbox = async <T>(
   fn: (sandbox: Sandbox) => Promise<T>,
   options?: SandboxOptions,
 ): Promise<T> => {
+  console.info("Starting withSandbox...");
   await using sandbox = await createSandbox(options);
+  console.info(`Sandbox ID: ${sandbox.id}`);
   return await fn(sandbox);
 };
 
@@ -46,7 +50,7 @@ export const SERVER_APP_SANDBOX_OPTIONS: SandboxOptions = {
     "/data/imagemagick": IMAGEMAGICK_STORAGE_VOLUME_NAME,
   },
   region: "ord",
-  memoryMb: 4096,
+  memory: "1GB",
   timeout: "10m",
 };
 
@@ -147,6 +151,8 @@ EOF'`.sudo();
     },
     region: "ord",
   };
+
+  delay(20000); // wait for volume to be ready
 
   await withSandbox(async (sandbox) => {
     await sandbox.fs.writeTextFile("/data/server_app/server.ts", Deno.readTextFileSync("./sandboxServerApp/server.ts"));

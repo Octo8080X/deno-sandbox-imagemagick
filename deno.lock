@@ -4,7 +4,7 @@
     "jsr:@deno/esbuild-plugin@^1.2.0": "1.2.0",
     "jsr:@deno/loader@~0.3.2": "0.3.10",
     "jsr:@deno/loader@~0.3.3": "0.3.10",
-    "jsr:@deno/sandbox@0.10": "0.10.0",
+    "jsr:@deno/sandbox@~0.10.1": "0.10.1",
     "jsr:@fresh/build-id@1": "1.0.1",
     "jsr:@fresh/core@2": "2.2.0",
     "jsr:@fresh/core@^2.2.0": "2.2.0",
@@ -65,8 +65,8 @@
     "@deno/loader@0.3.10": {
       "integrity": "a9c0aa44a0499e7fecef52c29fbc206c1c8f8946388f25d9d0789a23313bfd43"
     },
-    "@deno/sandbox@0.10.0": {
-      "integrity": "4157bd2ff55b2fe47dcfb4fd180a47f47cf7d5c93fe6724e1eee41a170b51865",
+    "@deno/sandbox@0.10.1": {
+      "integrity": "98e3b6cd041c019c1af8d6528d02ee4f66d620ac38e62fc27a5db4ecc030ec95",
       "dependencies": [
         "jsr:@std/fs",
         "jsr:@std/path@^1.1.2",
@@ -1459,7 +1459,7 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@deno/sandbox@0.10",
+      "jsr:@deno/sandbox@~0.10.1",
       "jsr:@fresh/core@^2.2.0",
       "jsr:@fresh/plugin-vite@^1.0.8",
       "jsr:@std/async@^1.1.1",

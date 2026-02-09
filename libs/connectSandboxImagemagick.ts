@@ -36,9 +36,18 @@ export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
   const cachedId = await getCache<string>("server_app_sandbox_id");
   const cachedPass = await getCache<string>("server_app_pass_phrase");
 
+  console.log("Cached Sandbox Info:", {
+    cachedUrl,
+    cachedId,
+    cachedPass,
+  });
+
   if (cachedUrl && cachedId && cachedPass && await isRunningSandbox(cachedId)) {
+    console.log("Using cached sandbox info.");
     return { publicUrl: cachedUrl, passPhrase: cachedPass };
   }
+
+  console.log("do refreshSandbox");
 
   return refreshSandbox();
 }

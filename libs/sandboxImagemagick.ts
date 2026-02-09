@@ -63,10 +63,8 @@ export async function isRunningSandbox(sandboxId: string): Promise<boolean> {
   console.log("////");
 
   for (const sandbox of sandboxes) {
-    console.info(`sandboxe: ${JSON.stringify(sandbox)}`);
-    if (
-      //sandbox.id === sandboxId && 
-      sandbox.status === "running") {
+    console.info(`sandbox: ${JSON.stringify(sandbox)}`);
+    if (sandbox.id === sandboxId && sandbox.status === "running") {
       console.info(`Sandbox ${sandboxId} is running.`);
       return true;
     }

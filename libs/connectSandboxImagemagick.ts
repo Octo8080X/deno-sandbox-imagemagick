@@ -1,4 +1,4 @@
-import { getCache, setCache } from "./kvCache.ts";
+import { getCache, setCache, withLock } from "./kvCache.ts";
 import {
   isRunningSandbox,
   SERVER_APP_ENTRYPOINT,
@@ -47,9 +47,19 @@ export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
     return { publicUrl: cachedUrl, passPhrase: cachedPass };
   }
 
-  console.log("do refreshSandbox");
+  return await withLock("server_app_refresh", async () => {
+    const cachedUrl2 = await getCache<string>("server_app_public_url");
+    const cachedId2 = await getCache<string>("server_app_sandbox_id");
+    const cachedPass2 = await getCache<string>("server_app_pass_phrase");
 
-  return refreshSandbox();
+    if (cachedUrl2 && cachedId2 && cachedPass2 && await isRunningSandbox(cachedId2)) {
+      console.log("Using cached sandbox info.");
+      return { publicUrl: cachedUrl2, passPhrase: cachedPass2 };
+    }
+
+    console.log("do refreshSandbox");
+    return await refreshSandbox();
+  }, { ttlMs: 20_000, waitMs: 200, maxWaitMs: 20_000 });
 }
 
 export async function fetchSandboxApi(

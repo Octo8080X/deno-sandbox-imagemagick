@@ -26,7 +26,7 @@ async function refreshSandbox(): Promise<SandboxConnectInfo> {
   );
 
   await setCache("server_app_public_url", publicUrl, 600_000);
-  await setCache("server_app_sandbox_id", sandboxId, 60_000_000);
+  await setCache("server_app_sandbox_id", sandboxId, 600_000);
 
   return { publicUrl, passPhrase };
 }

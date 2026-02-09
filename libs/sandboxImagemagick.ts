@@ -28,10 +28,7 @@ const createSandbox = async (options?: SandboxOptions) => {
   const sandbox = await Sandbox.create({
     memory: "1GB",
     region: "ord",
-    ...options,
-    labels: {
-      purpose: "imagemagick-server-app",
-    }
+    ...options
   });
   return sandbox;
 };
@@ -67,7 +64,9 @@ export async function isRunningSandbox(sandboxId: string): Promise<boolean> {
 
   for (const sandbox of sandboxes) {
     console.info(`sandboxe: ${JSON.stringify(sandbox)}`);
-    if (sandbox.id === sandboxId && sandbox.status === "running") {
+    if (
+      //sandbox.id === sandboxId && 
+      sandbox.status === "running") {
       console.info(`Sandbox ${sandboxId} is running.`);
       return true;
     }

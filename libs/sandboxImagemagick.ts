@@ -58,18 +58,11 @@ export async function isRunningSandbox(sandboxId: string): Promise<boolean> {
   const client = new Client();
 
   const sandboxes = await client.sandboxes.list();
-  console.log("////");
-  console.log(sandboxes);
-  console.log("////");
-
   for (const sandbox of sandboxes) {
-    console.info(`sandbox: ${JSON.stringify(sandbox)}`);
     if (sandbox.id === sandboxId && sandbox.status === "running") {
-      console.info(`Sandbox ${sandboxId} is running.`);
       return true;
     }
   }
-  console.info(`Sandbox ${sandboxId} is not running.`);
   return false;
   
 }

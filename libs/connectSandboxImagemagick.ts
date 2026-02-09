@@ -18,15 +18,15 @@ export type SandboxRequestState = {
 
 async function refreshSandbox(): Promise<SandboxConnectInfo> {
   const passPhrase = crypto.randomUUID();
-  await setCache("server_app_pass_phrase", passPhrase, 600_000);
+  await setCache("server_app_pass_phrase", passPhrase, 60_000_000);
 
   const { publicUrl, sandboxId } = await startServerAppSandbox(
     SERVER_APP_ENTRYPOINT,
     { ...SERVER_APP_SANDBOX_OPTIONS, env: { CALLER_PASSPHRASE: passPhrase } },
   );
 
-  await setCache("server_app_public_url", publicUrl, 600_000);
-  await setCache("server_app_sandbox_id", sandboxId, 600_000);
+  await setCache("server_app_public_url", publicUrl, 60_000_000);
+  await setCache("server_app_sandbox_id", sandboxId, 60_000_000);
 
   return { publicUrl, passPhrase };
 }
@@ -36,14 +36,7 @@ export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
   const cachedId = await getCache<string>("server_app_sandbox_id");
   const cachedPass = await getCache<string>("server_app_pass_phrase");
 
-  console.log("Cached Sandbox Info:", {
-    cachedUrl,
-    cachedId,
-    cachedPass,
-  });
-
   if (cachedUrl && cachedId && cachedPass && await isRunningSandbox(cachedId)) {
-    console.log("Using cached sandbox info.");
     return { publicUrl: cachedUrl, passPhrase: cachedPass };
   }
 
@@ -53,11 +46,8 @@ export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
     const cachedPass2 = await getCache<string>("server_app_pass_phrase");
 
     if (cachedUrl2 && cachedId2 && cachedPass2 && await isRunningSandbox(cachedId2)) {
-      console.log("Using cached sandbox info.");
       return { publicUrl: cachedUrl2, passPhrase: cachedPass2 };
     }
-
-    console.log("do refreshSandbox");
     return await refreshSandbox();
   }, { ttlMs: 20_000, waitMs: 200, maxWaitMs: 20_000 });
 }

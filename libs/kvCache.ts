@@ -3,10 +3,12 @@
 const CACHE_KEY = "kvCache" as const;
 const LOCK_KEY = "kvLock" as const;
 
-// Use persistent KV only for prod; in-memory for all other environments (dev, test, etc.).
-const store = Deno.env.get("APP_ENV") === "prod"
-  ? await Deno.openKv()
-  : await Deno.openKv("tmp/memory");
+// Use persistent KV by default. Use in-memory only for local/dev/test.
+const appEnv = Deno.env.get("APP_ENV")?.toLowerCase();
+const useInMemory = appEnv === "local" || appEnv === "dev" || appEnv === "test";
+const store = useInMemory
+  ? await Deno.openKv("tmp/memory")
+  : await Deno.openKv();
 
 export function getCacheKey(key: string): string[] {
   return [CACHE_KEY, key];

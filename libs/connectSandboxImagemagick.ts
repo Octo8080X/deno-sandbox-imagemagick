@@ -55,6 +55,12 @@ export async function ensureServerAppReady(): Promise<SandboxConnectInfo> {
   const cachedId = await getCache<string>("server_app_sandbox_id");
   const cachedPass = await getCache<string>("server_app_pass_phrase");
 
+  console.log("Cached server app info:", JSON.stringify({
+    publicUrl: cachedUrl,
+    sandboxId: cachedId,
+    passPhrase: cachedPass,
+  }, null, 2 ));
+
   if (
     cachedUrl && cachedId && cachedPass &&
     await isServerAppReachable(cachedUrl, cachedPass)
